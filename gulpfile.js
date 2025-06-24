@@ -1,29 +1,27 @@
 import gulp from 'gulp';
 import fileInclude from 'gulp-file-include';
-import del from 'del';
 
-// Copy and include HTML files (excluding partials)
+const version = 'v2';
+const outputFolder = 'dist';
+
 export function copyhtml() {
-  return gulp.src(['src/*.html'])
+  return gulp.src([`src/${version}/*.html`])
     .pipe(fileInclude({
       prefix: '@@',
       basepath: '@file'
     }))
-    .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest(outputFolder));
 }
 
-// Copy CSS file(s)
 export function copycss() {
-  return gulp.src('src/*.css') // includes dashboard.css
-    .pipe(gulp.dest('dist'));
+  return gulp.src([`src/${version}/*.css`])
+    .pipe(gulp.dest(outputFolder));
 }
 
-// Copy JS file(s)
 export function copyjs() {
-  return gulp.src('src/*.js') // includes dashboard.js
-    .pipe(gulp.dest('dist'));
+  return gulp.src([`src/${version}/*.js`])
+    .pipe(gulp.dest(outputFolder));
 }
 
-// Default task to run all of them
+// Default task
 export default gulp.parallel(copyhtml, copycss, copyjs);
-

@@ -67,7 +67,7 @@ export function copyIndexDist() {
     .pipe(gulp.dest(outputFolder));
 }
 
-// Serve task (temp folder)
+// Serve task 
 export function serve() {
   bs.init({
     server: {

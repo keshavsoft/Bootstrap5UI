@@ -5,30 +5,26 @@ import del from 'del';
 import rename from 'gulp-rename';
 
 const version = 'v2';
-const devFolder = 'dev';
+const tempFolder = '.temp';
 const outputFolder = 'dist';
 const bs = browserSync.create();
 
-
-export function cleanDev() {
-  return del([`${devFolder}/**/*`]);
+export function cleanTemp() {
+  return del([`${tempFolder}/**/*`]);
 }
-
 
 export function cleanDist() {
   return del([`${outputFolder}/**/*`]);
 }
 
-
-export function copyhtmlDev() {
+export function copyhtmlTemp() {
   return gulp.src([`src/${version}/*.html`])
     .pipe(fileInclude({
       prefix: '@@',
       basepath: '@file'
     }))
-    .pipe(gulp.dest(devFolder));
+    .pipe(gulp.dest(tempFolder));
 }
-
 
 export function copyhtmlDist() {
   return gulp.src([`src/${version}/*.html`])
@@ -39,37 +35,31 @@ export function copyhtmlDist() {
     .pipe(gulp.dest(outputFolder));
 }
 
-
-export function copycssDev() {
+export function copycssTemp() {
   return gulp.src([`src/${version}/*.css`])
-    .pipe(gulp.dest(devFolder));
+    .pipe(gulp.dest(tempFolder));
 }
-
 
 export function copycssDist() {
   return gulp.src([`src/${version}/*.css`])
     .pipe(gulp.dest(outputFolder));
 }
 
-
-export function copyjsDev() {
+export function copyjsTemp() {
   return gulp.src([`src/${version}/*.js`])
-    .pipe(gulp.dest(devFolder));
+    .pipe(gulp.dest(tempFolder));
 }
-
 
 export function copyjsDist() {
   return gulp.src([`src/${version}/*.js`])
     .pipe(gulp.dest(outputFolder));
 }
 
-
-export function copyIndexDev() {
+export function copyIndexTemp() {
   return gulp.src([`src/${version}/Dashboard.html`])
     .pipe(rename('index.html'))
-    .pipe(gulp.dest(devFolder));
+    .pipe(gulp.dest(tempFolder));
 }
-
 
 export function copyIndexDist() {
   return gulp.src([`src/${version}/Dashboard.html`])
@@ -77,32 +67,32 @@ export function copyIndexDist() {
     .pipe(gulp.dest(outputFolder));
 }
 
-// Serve task (dev folder)
+// Serve task 
 export function serve() {
   bs.init({
     server: {
-      baseDir: devFolder
+      baseDir: tempFolder
     },
     port: 3000,
     open: true
   });
 
-  gulp.watch(`src/${version}/*.html`, gulp.series(copyhtmlDev, copyIndexDev, bs.reload));
-  gulp.watch(`src/${version}/*.css`, gulp.series(copycssDev, bs.reload));
-  gulp.watch(`src/${version}/*.js`, gulp.series(copyjsDev, bs.reload));
+  gulp.watch(`src/${version}/*.html`, gulp.series(copyhtmlTemp, copyIndexTemp, bs.reload));
+  gulp.watch(`src/${version}/*.css`, gulp.series(copycssTemp, bs.reload));
+  gulp.watch(`src/${version}/*.js`, gulp.series(copyjsTemp, bs.reload));
 }
 
-
-export const buildDevFolder = gulp.series(
-  cleanDev,
-  gulp.parallel(copyhtmlDev, copycssDev, copyjsDev, copyIndexDev)
+// Build:temp (for temp folder)
+export const buildTempFolder = gulp.series(
+  cleanTemp,
+  gulp.parallel(copyhtmlTemp, copycssTemp, copyjsTemp, copyIndexTemp)
 );
 
-
-export const buildDist = gulp.series(
+// Build:dist (for dist folder)
+export const buildDev = gulp.series(
   cleanDist,
   gulp.parallel(copyhtmlDist, copycssDist, copyjsDist, copyIndexDist)
 );
 
-
-gulp.task('default', gulp.series(buildDevFolder, serve));
+// Default task — build to temp and serve
+gulp.task('default', gulp.series(buildTempFolder, serve));

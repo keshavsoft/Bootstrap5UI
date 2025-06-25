@@ -1,8 +1,9 @@
 .bi {
-  display: block;
-  width: auto;
-  height: auto;
-  margin: 0 auto;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin: 0;
+  vertical-align: middle;
 }
 
 /*

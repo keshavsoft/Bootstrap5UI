@@ -2,18 +2,35 @@ import gulp from 'gulp';
 import fileInclude from 'gulp-file-include';
 import browserSync from 'browser-sync';
 import del from 'del';
+import rename from 'gulp-rename';
 
 const version = 'v2';
+const devFolder = 'dev';
 const outputFolder = 'dist';
 const bs = browserSync.create();
 
-// Clean dist folder
-export function clean() {
+
+export function cleanDev() {
+  return del([`${devFolder}/**/*`]);
+}
+
+
+export function cleanDist() {
   return del([`${outputFolder}/**/*`]);
 }
 
-// Copy and include HTML
-export function copyhtml() {
+
+export function copyhtmlDev() {
+  return gulp.src([`src/${version}/*.html`])
+    .pipe(fileInclude({
+      prefix: '@@',
+      basepath: '@file'
+    }))
+    .pipe(gulp.dest(devFolder));
+}
+
+
+export function copyhtmlDist() {
   return gulp.src([`src/${version}/*.html`])
     .pipe(fileInclude({
       prefix: '@@',
@@ -22,38 +39,70 @@ export function copyhtml() {
     .pipe(gulp.dest(outputFolder));
 }
 
-// Copy CSS
-export function copycss() {
+
+export function copycssDev() {
+  return gulp.src([`src/${version}/*.css`])
+    .pipe(gulp.dest(devFolder));
+}
+
+
+export function copycssDist() {
   return gulp.src([`src/${version}/*.css`])
     .pipe(gulp.dest(outputFolder));
 }
 
-// Copy JS
-export function copyjs() {
+
+export function copyjsDev() {
+  return gulp.src([`src/${version}/*.js`])
+    .pipe(gulp.dest(devFolder));
+}
+
+
+export function copyjsDist() {
   return gulp.src([`src/${version}/*.js`])
     .pipe(gulp.dest(outputFolder));
 }
 
-// Serve task (runs separately)
+
+export function copyIndexDev() {
+  return gulp.src([`src/${version}/Dashboard.html`])
+    .pipe(rename('index.html'))
+    .pipe(gulp.dest(devFolder));
+}
+
+
+export function copyIndexDist() {
+  return gulp.src([`src/${version}/Dashboard.html`])
+    .pipe(rename('index.html'))
+    .pipe(gulp.dest(outputFolder));
+}
+
+// Serve task (dev folder)
 export function serve() {
   bs.init({
     server: {
-      baseDir: outputFolder
+      baseDir: devFolder
     },
     port: 3000,
     open: true
   });
 
-  gulp.watch(`src/${version}/*.html`, gulp.series(copyhtml, bs.reload));
-  gulp.watch(`src/${version}/*.css`, gulp.series(copycss, bs.reload));
-  gulp.watch(`src/${version}/*.js`, gulp.series(copyjs, bs.reload));
+  gulp.watch(`src/${version}/*.html`, gulp.series(copyhtmlDev, copyIndexDev, bs.reload));
+  gulp.watch(`src/${version}/*.css`, gulp.series(copycssDev, bs.reload));
+  gulp.watch(`src/${version}/*.js`, gulp.series(copyjsDev, bs.reload));
 }
 
-// Build:dist
-export const buildDist = gulp.series(
-  clean,
-  gulp.parallel(copyhtml, copycss, copyjs)
+
+export const buildDevFolder = gulp.series(
+  cleanDev,
+  gulp.parallel(copyhtmlDev, copycssDev, copyjsDev, copyIndexDev)
 );
 
-// Default task — only build
-export default buildDist;
+
+export const buildDist = gulp.series(
+  cleanDist,
+  gulp.parallel(copyhtmlDist, copycssDist, copyjsDist, copyIndexDist)
+);
+
+
+gulp.task('default', gulp.series(buildDevFolder, serve));
